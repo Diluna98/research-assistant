@@ -26,6 +26,10 @@ FROM runtime AS test
 
 RUN python -m pip install --no-cache-dir pytest==9.2.0
 
+# GPU diagnostic modules
+COPY gpu_telemetry.py .
+COPY gpu_tool_dispatcher.py .
+
 COPY tests/ ./tests/
 
 CMD ["python", "-m", "pytest", "tests", "-v"]
