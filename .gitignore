@@ -1,0 +1,17 @@
+
+# Local configuration
+.env
+
+# Python virtual environment
+.venv/
+
+# Python generated files
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Generated application data
+results/
+
+# Local research documents
+papers/*.pdf

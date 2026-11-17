@@ -1,0 +1,20 @@
+
+# Python virtual environment
+.venv/
+
+# Python temporary files
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Git history
+.git/
+
+# Local environment configuration
+.env
+
+# Generated research data
+results/
+
+# Local PDF documents
+papers/
