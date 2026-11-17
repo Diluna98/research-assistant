@@ -1,0 +1,25 @@
+
+name: Research Assistant CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Build Docker testing image
+        run: docker build --target test -t research-assistant:test .
+
+      - name: Run automated tests
+        run: docker run --rm research-assistant:test
