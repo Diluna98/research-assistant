@@ -79,10 +79,12 @@ def run_gpu_agent(question: str):
 
     response = chat_or_error(payload)
 
-    if response is not None:
-        assistant_message = response["message"]
-        tool_calls = assistant_message.get("tool_calls", [])
+    if response is None:
+        print("Agent stopped because Ollama is unavailable.")
+        return
 
+    assistant_message = response["message"]
+    tool_calls = assistant_message.get("tool_calls", [])
 
     if len(tool_calls) == 0:
 
@@ -160,11 +162,6 @@ def run_gpu_agent(question: str):
 
             print("\nFinal assistant answer:")
             print(final_message.get("content", ""))
-
-
-
-    if response is not None:
-        message = response["message"]
 
 if __name__ == "__main__":
     question = input("Ask the GPU agent: ")
