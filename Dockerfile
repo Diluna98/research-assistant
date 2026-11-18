@@ -16,21 +16,21 @@ COPY equation_utils.py .
 COPY ollama_client.py .
 COPY logging_config.py .
 COPY config.py .
+COPY research_retrieval.py .
 
 # Default application command
 CMD ["python", "rag_qa.py"]
 
 
 # Testing image
+
 FROM runtime AS test
 
 RUN python -m pip install --no-cache-dir pytest==9.2.0
 
-# GPU diagnostic modules
-COPY gpu_telemetry.py .
-COPY gpu_tool_dispatcher.py .
-COPY gpu_agent.py .
-COPY gpu_processes.py .
+# Include Python modules for automated testing
+COPY *.py ./
+
 COPY tests/ ./tests/
 
 CMD ["python", "-m", "pytest", "tests", "-v"]

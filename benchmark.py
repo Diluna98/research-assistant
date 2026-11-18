@@ -1,16 +1,14 @@
 
 import statistics
-import requests
-
 import json
 from pathlib import Path
 from datetime import datetime, timezone
-
-
-URL = "http://localhost:11434/api/chat"
+from time import perf_counter
+from config import load_config
+from ollama_client import post_chat
 
 payload = {
-    "model": "qwen3:4b",
+    "model": load_config()["model"],
     "messages": [
         {
             "role": "user",
@@ -28,9 +26,11 @@ payload = {
 
 
 def run_inference():
-    response = requests.post(URL, json=payload, timeout=180)
-    response.raise_for_status()
-    data = response.json()
+    start = perf_counter()
+
+    data = post_chat(payload)
+
+    wall_time = perf_counter() - start
 
     total = data["total_duration"] / 1e9
     loading = data["load_duration"] / 1e9
@@ -46,6 +46,7 @@ def run_inference():
         "prompt": prompt,
         "generation": generation,
         "tokens": tokens,
+        "wall_time": wall_time,
         "speed": speed
     }
 
@@ -54,7 +55,7 @@ print("Warming up the model...")
 run_inference()
 
 
-results_path = Path("results") / "benchmark_runs.jsonl"
+results_path = Path("results") / "workload_baseline.jsonl"
 
 results_path.parent.mkdir(
     parents=True,
@@ -91,8 +92,13 @@ for i in range(5):
 
 speeds = [result["speed"] for result in results]
 durations = [result["total"] for result in results]
+wall_times = [result["wall_time"] for result in results]
 
 print("\nBenchmark summary:")
 print(f"Average generation speed: {statistics.mean(speeds):.2f} tokens/s")
 print(f"Speed standard deviation: {statistics.stdev(speeds):.2f} tokens/s")
 print(f"Average total duration: {statistics.mean(durations):.2f} seconds")
+print(
+    f"Average wall time: "
+    f"{statistics.mean(wall_times):.3f} seconds"
+)

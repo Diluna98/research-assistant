@@ -1,82 +1,25 @@
 
-import requests
-import json
-from pathlib import Path
-from retrieve_hybrid import hybrid_search
 from time import perf_counter
-import re
-from equation_utils import find_equation_numbers, select_equation_chunks
 from ollama_client import chat_or_error
 from logging_config import configure_logging
 from config import load_config
-
+from research_retrieval import retrieve_evidence
 
 def answer_question(question):
     application_start = perf_counter()
 
-    # Step 1: Retrieve relevant passages
-    chunks = hybrid_search(question, top_k=5)
-
-    retrieval_time = perf_counter() - application_start
-
-    # Load the complete document index
-    all_chunks = json.loads(
-        Path("results/paper_chunks.json").read_text(
-            encoding="utf-8"
-        )
+    # Step 1: Retrieve research evidence
+    chunks = retrieve_evidence(
+        question,
+        top_k=5
     )
 
-    # Create lookup by chunk ID
-    chunk_lookup = {
-        chunk["chunk_id"]: chunk
-        for chunk in all_chunks
-    }
-
-    expanded_chunks = []
-    seen_ids = set()
-
-    def add_chunk(chunk):
-        if chunk["chunk_id"] not in seen_ids:
-            expanded_chunks.append(chunk)
-            seen_ids.add(chunk["chunk_id"])
-
-
-
-    for chunk in chunks:
-
-        # Include the retrieved passage
-        add_chunk(chunk)
-
-        # Find the next neighboring passage
-        next_id = chunk["chunk_id"] + 1
-        next_chunk = chunk_lookup.get(next_id)
-
-        # Expand only within the same PDF page
-        if next_chunk is not None:
-            if next_chunk["page"] == chunk["page"]:
-                add_chunk(next_chunk)
-
-
-
-    # Detect equation references
-
-    equation_numbers = find_equation_numbers(question)
-
-    if equation_numbers:
-        equation_chunks = select_equation_chunks(
-            all_chunks,
-            equation_numbers
-        )
-
-        if equation_chunks:
-            chunks = equation_chunks
+    retrieval_time = perf_counter() - application_start
 
     print(
         "Final selected chunks:",
         [chunk["chunk_id"] for chunk in chunks]
     )
-
-
 
     # Step 2: Construct the context
     context = "\n\n".join(

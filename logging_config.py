@@ -20,6 +20,9 @@ class JsonFormatter(logging.Formatter):
             "reason": getattr(record, "reason", None)
         }
 
+        metrics = getattr(record, "metrics", None)
+        if metrics is not None:
+            data["metrics"] = metrics
         return json.dumps(data)
 
 
