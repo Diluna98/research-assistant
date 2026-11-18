@@ -37,3 +37,31 @@ def test_rejects_unknown_tool():
             "name": "delete_files",
             "arguments": {}
         })
+
+def test_executes_gpu_process_tool(monkeypatch):
+
+    def fake_processes():
+        return {
+            "count": 1,
+            "processes": [
+                {
+                    "pid": 1234,
+                    "name": "ollama.exe"
+                }
+            ]
+        }
+
+    monkeypatch.setattr(
+        "gpu_tool_dispatcher.read_gpu_processes",
+        fake_processes
+    )
+
+    result = execute_tool({
+        "name": "read_gpu_processes",
+        "arguments": {}
+    })
+
+    data = json.loads(result)
+
+    assert data["count"] == 1
+    assert data["processes"][0]["name"] == "ollama.exe"
